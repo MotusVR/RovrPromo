@@ -72,3 +72,11 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Pico Plugin Files
+Plugins/PicoXR/*
+Plugins/OnlineSubsystemPico/*
+
+
+# Photon Cloud Plugin Files
+Plugins/PhotonCloudAPI/*
