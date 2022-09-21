@@ -20,7 +20,7 @@
 		{
 			"Name": "AndroidAPITemplate",
 			"Type": "Runtime",
-			"LoadingPhase": "EarliestPossible",
+			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
 				"Win64",
 				"Win32",
