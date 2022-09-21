@@ -32,12 +32,12 @@
 		},
 		{
 			"Name": "PlayFab",
-			"Enabled": true,
+			"Enabled": false,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/217fdf581b784571af03d3fb6580368f"
 		},
 		{
 			"Name": "PhotonCloudAPI",
-			"Enabled": true,
+			"Enabled": false,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/76bee07c672c4dbba14df190d82f7f33"
 		},
 		{
@@ -68,7 +68,7 @@
 		},
 		{
 			"Name": "PicoXR",
-			"Enabled": true,
+			"Enabled": false,
 			"SupportedTargetPlatforms": [
 				"Win64",
 				"Android"
