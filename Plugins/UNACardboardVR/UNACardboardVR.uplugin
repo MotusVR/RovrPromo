@@ -1,0 +1,30 @@
+{
+	"FileVersion": 3,
+	"Version": 7,
+	"VersionName": "1.2.2",
+	"FriendlyName": "Cardboard VR",
+	"Description": "Support for Google Cardboard VR headsets on iOS and Android platforms, integrating the official Google Cardboard SDK.",
+	"Category": "Virtual Reality",
+	"CreatedBy": "UNAmedia",
+	"CreatedByURL": "https://www.unamedia.com",
+	"DocsURL": "https://www.unamedia.com/ue4-cardboard/api/",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/b8f0c6beecd5418ea7aa4d5e615b285b",
+	"SupportURL": "https://www.unamedia.com",
+	"EngineVersion": "4.27.0",
+	"CanContainContent": false,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "UNACardboardVR",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64",
+				"Win32",
+				"Mac",
+				"Android",
+				"IOS"
+			]
+		}
+	]
+}

@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- steps to add to build additions -->
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+	<!-- init section is always evaluated once per architecture -->
+	<init>
+      <log text="UNACardboardVR configuration" />
+
+	    <setBool result="bSupported" value="false"/>
+	    <isArch arch="armeabi-v7a">
+	        <setBool result="bSupported" value="true"/>
+	    </isArch>
+      <isArch arch="arm64-v8a">
+        <setBool result="bSupported" value="true"/>
+      </isArch>
+	</init>
+
+  <androidManifestUpdates>
+    <addPermission android:name="android.permission.CAMERA" />
+    <addPermission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <addPermission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <addPermission android:name="android.permission.INTERNET" />
+    <addPermission android:name="android.permission.NFC" />
+
+    <addFeature android:name="android.hardware.sensor.accelerometer" android:required="true" />
+    <addFeature android:name="android.hardware.sensor.gyroscope" android:required="true" />
+
+    <addElements tag="$">
+      <meta-data android:name="com.google.android.gms.vision.DEPENDENCIES" android:value="barcode" />
+    </addElements>
+  </androidManifestUpdates>
+
+  <proguardAdditions>
+    <insert>
+      -keep class com.google.cardboard.** { *; }
+      -keepnames class com.google.cardboard.** { *; }
+      -keepclassmembers class * {
+        @com.google.cardboard *;
+      }
+    </insert>
+  </proguardAdditions>
+
+  <gameActivityImportAdditions>
+    <insert>
+      import android.view.MenuInflater;
+      import android.view.MenuItem;
+      import android.widget.PopupMenu;
+      import android.widget.ImageButton;
+      import android.view.ViewGroup;
+      import com.unamedia.cardboard.unreal.UNACardboardVRJavaHelper;
+    </insert>
+  </gameActivityImportAdditions>
+
+  <gameActivityClassAdditions>
+    <insert>
+      //private UNACardboardVRJavaHelper cardboardJavaHelper = null;
+      private View cardboardLayout = null;
+    </insert>
+
+    <insert>
+      private void setImmersiveSticky() {
+      getWindow()
+      .getDecorView()
+      .setSystemUiVisibility(
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        | View.SYSTEM_UI_FLAG_FULLSCREEN
+        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+      }
+
+      /** Callback for when the back button is pressed. */
+      public void onBackButtonPressed(View view) {
+        UNACardboardVRJavaHelper.onBackButtonPressed();
+      }
+
+    /** Callback for when settings_menu button is pressed. */
+    public void showSettings(View view) {
+      PopupMenu popup = new PopupMenu(this, view);
+      MenuInflater inflater = popup.getMenuInflater();
+      int settingsMenuId = getResources().getIdentifier("settings_menu", "menu", getPackageName());
+      inflater.inflate(settingsMenuId, popup.getMenu());
+      popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem menuItem) {
+          int switchViewerId = getResources().getIdentifier("switch_viewer", "id", getPackageName());
+          if (menuItem.getItemId() == switchViewerId) {
+            UNACardboardVRJavaHelper.onSwitchViewerButtonPressed();
+            return true;
+          }
+          return false;
+        }
+      });
+      popup.show();
+      
+      UNACardboardVRJavaHelper.onSettingsMenuOpened();
+    }
+    
+    public void toggleStereoRendering(View view) {
+      UNACardboardVRJavaHelper.onToggleStereoModeButtonPressed();
+    }
+    
+    private void SetResourceVisibility(String resName, boolean bVisible) {
+      int id = getResources().getIdentifier(resName, "id", getPackageName());
+      View view = cardboardLayout.findViewById(id);
+      if(view != null) {
+        view.setVisibility(bVisible ? View.VISIBLE : View.GONE);
+      }
+    }
+    
+    public void AndroidThunkJava_SetupUILayer(
+      final boolean bVisible, 
+      final boolean bIsStereoEnabled, 
+      final boolean bSettingsButtonVisible,
+      final boolean bBackButtonVisible,
+      final boolean bToggleStereoModeButtonVisible)
+    {
+      runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+        
+          boolean bVisibleOverride = bVisible &amp;&amp; bIsStereoEnabled;
+        
+          if (cardboardLayout instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) cardboardLayout;
+            for(int i = 0; i &lt; viewGroup.getChildCount(); ++i) {
+              View child = viewGroup.getChildAt(i);
+              child.setVisibility(bVisibleOverride ? View.VISIBLE : View.GONE);
+            }
+          }
+          
+          if(bVisibleOverride) {
+            SetResourceVisibility("ui_settings_button_holder", bSettingsButtonVisible);
+            SetResourceVisibility("ui_back_button_holder", bBackButtonVisible);
+          }
+          
+          SetResourceVisibility("ui_toggle_stereo_button_holder", bToggleStereoModeButtonVisible);
+          
+          int toggleStereoBtnId = getResources().getIdentifier("ui_toggle_stereo_button", "id", getPackageName());
+          ImageButton toggleStereoBtn = (ImageButton)cardboardLayout.findViewById(toggleStereoBtnId);
+          if(toggleStereoBtn != null) {
+            int cardboardIconId = getResources().getIdentifier("ic_cardboard", "drawable", getPackageName());
+            int fullscreenIconId = getResources().getIdentifier("ic_fullscreen", "drawable", getPackageName());            
+            toggleStereoBtn.setImageResource(bIsStereoEnabled ? fullscreenIconId : cardboardIconId);
+          }
+        }
+      });
+    }
+    </insert>
+  </gameActivityClassAdditions>
+
+  <gameActivityOnPauseAdditions>
+    <insert>
+      UNACardboardVRJavaHelper.onApplicationPause();
+    </insert>
+  </gameActivityOnPauseAdditions>
+
+  <gameActivityOnResumeAdditions>
+    <insert>
+      UNACardboardVRJavaHelper.onApplicationResume();
+    </insert>
+  </gameActivityOnResumeAdditions>
+
+  <gameActivityOnStartAdditions>
+    <insert>
+      UNACardboardVRJavaHelper.onApplicationStart();
+    </insert>
+  </gameActivityOnStartAdditions>
+
+  <gameActivityOnStopAdditions>
+    <insert>
+      UNACardboardVRJavaHelper.onApplicationStop();
+    </insert>
+  </gameActivityOnStopAdditions>
+  <gameActivityOnActivityResultAdditions>
+    <insert>
+    </insert>
+  </gameActivityOnActivityResultAdditions>
+
+  <gameActivityOnCreateAdditions>
+    <insert>
+      UNACardboardVRJavaHelper.onApplicationCreated();
+    </insert>
+    <insert>
+      setImmersiveSticky();
+      View decorView = getWindow().getDecorView();
+      decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
+        @Override
+        public void onSystemUiVisibilityChange(int visibility) {
+          if ((visibility &amp; View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+            setImmersiveSticky();
+          }
+        }
+      });
+
+      // Forces screen to max brightness.
+      WindowManager.LayoutParams layout = getWindow().getAttributes();
+      layout.screenBrightness = 1.f;
+      getWindow().setAttributes(layout);
+
+      // Prevents screen from dimming/locking.
+      getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    </insert>
+
+    <insert>
+      int cardboardLayoutId = getResources().getIdentifier("cardboard_ui", "layout", getPackageName());
+      cardboardLayout = View.inflate(this, cardboardLayoutId, null);
+      cardboardLayout.setLayoutParams(new LinearLayout.LayoutParams(
+      LinearLayout.LayoutParams.MATCH_PARENT,
+      LinearLayout.LayoutParams.MATCH_PARENT));
+      containerFrameLayout.addView(cardboardLayout);
+    </insert>
+  </gameActivityOnCreateAdditions>
+
+  <gameActivityOnDestroyAdditions>
+    <insert>
+      UNACardboardVRJavaHelper.onApplicationDestroyed();
+    </insert>
+  </gameActivityOnDestroyAdditions>
+  
+  <baseBuildGradleAdditions>
+    <insert>
+      allprojects {
+      repositories {
+      repositories {
+      flatDir {
+    </insert>
+    <insertValue value="dirs '$S(PluginDir)/../ThirdParty/cardboard-sdk/build/android'"/>
+    <insertNewline/>
+    <insert>
+      }
+      }
+      }
+      }
+    </insert>
+  </baseBuildGradleAdditions>
+
+  <buildGradleAdditions>
+    <insert>
+      dependencies.implementation(name: 'sdk-release', ext: 'aar')
+    </insert>
+  </buildGradleAdditions>
+
+  <AARImports>
+    <insertValue value="com.android.support,appcompat-v7,28.0.0" />
+    <insertNewline/>
+    <insertValue value="com.google.protobuf,protobuf-javalite,3.8.0" />
+    <insertNewline/>
+    <insertValue value="com.android.support.constraint,constraint-layout,1.1.3" />
+    <insertNewline/>
+    <insertValue value="com.android.support,design,28.0.0" />
+    <insertNewline/>
+    <insertValue value="com.google.android.gms,play-services-vision,11.8.0" />
+    <insertNewline/>
+  </AARImports>
+
+	<!-- optional files or directories to copy to Intermediate/Android/APK -->
+	<resourceCopies>
+	  <isArch arch="armeabi-v7a">
+	    <copyFile src="$S(PluginDir)/../ThirdParty/cardboard-sdk/build/android/armeabi-v7a/libcardboard_api.so"
+	              dst="$S(BuildDir)/libs/armeabi-v7a/libcardboard_api.so" />
+		</isArch>
+    <isArch arch="arm64-v8a">
+      <copyFile src="$S(PluginDir)/../ThirdParty/cardboard-sdk/build/android/arm64-v8a/libcardboard_api.so"
+	              dst="$S(BuildDir)/libs/arm64-v8a/libcardboard_api.so" />
+    </isArch>
+  </resourceCopies>
+
+  <resourceCopies>
+    <log text="Copying UNACardboardVRJavaHelper plugin files to staging"/>
+    <copyDir src="$S(PluginDir)/Java" dst="$S(BuildDir)/src/com/unamedia/cardboard/unreal" />
+  </resourceCopies>
+
+  <resourceCopies>
+    <log text="Copying Android resources (layout, styles, etc)..."/>
+    <copyFile src="$S(PluginDir)/Resources/android/layout/cardboard_ui.xml" dst="$S(BuildDir)/src/../res/layout/cardboard_ui.xml"/>
+    <copyFile src="$S(PluginDir)/Resources/android/drawable-xxhdpi/quantum_ic_close_white_24.png" dst="$S(BuildDir)/src/../res/drawable-xxhdpi/quantum_ic_close_white_24.png"/>
+    <copyFile src="$S(PluginDir)/Resources/android/drawable-xxhdpi/quantum_ic_settings_white_24.png" dst="$S(BuildDir)/src/../res/drawable-xxhdpi/quantum_ic_settings_white_24.png"/>
+    <copyFile src="$S(PluginDir)/Resources/android/drawable-xxhdpi/rippleable.xml" dst="$S(BuildDir)/src/../res/drawable-xxhdpi/rippleable.xml"/>
+    <copyFile src="$S(PluginDir)/Resources/android/drawable-xxhdpi/ic_cardboard.png" dst="$S(BuildDir)/src/../res/drawable-xxhdpi/ic_cardboard.png"/>
+    <copyFile src="$S(PluginDir)/Resources/android/drawable-xxhdpi/ic_fullscreen.png" dst="$S(BuildDir)/src/../res/drawable-xxhdpi/ic_fullscreen.png"/>
+    <copyFile src="$S(PluginDir)/Resources/android/menu/settings_menu.xml" dst="$S(BuildDir)/src/../res/menu/settings_menu.xml"/>
+    <copyFile src="$S(PluginDir)/Resources/android/values/colors.xml" dst="$S(BuildDir)/src/../res/values/cardboard_colors.xml"/>
+    <copyFile src="$S(PluginDir)/Resources/android/values/dimens.xml" dst="$S(BuildDir)/src/../res/values/cardboard_dimens.xml"/>
+    <copyFile src="$S(PluginDir)/Resources/android/values/strings.xml" dst="$S(BuildDir)/src/../res/values/cardboard_strings.xml"/>
+    <copyFile src="$S(PluginDir)/Resources/android/values/styles.xml" dst="$S(BuildDir)/src/../res/values/cardboard_styles.xml"/>
+  </resourceCopies>
+
+	<!-- optional libraries to load in GameActivity.java before libUE4.so -->
+	<soLoadLibrary>
+	    <if condition="bSupported">
+	        <true>
+		    <loadLibrary name="cardboard_api" failmsg="Failed to load libcardboard_api library" />
+		</true>
+	    </if>
+	</soLoadLibrary>
+</root>
