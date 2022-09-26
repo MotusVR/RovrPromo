@@ -77,6 +77,8 @@ DerivedDataCache/*
 Plugins/PicoXR/*
 Plugins/OnlineSubsystemPico/*
 
+#GoogleCardboard
+Plugins/UNACardboardVR/*
 
 # Photon Cloud Plugin Files
 Plugins/PhotonCloudAPI/*
