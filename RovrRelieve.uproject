@@ -76,8 +76,13 @@
 		},
 		{
 			"Name": "MySQL",
-			"Enabled": true,
+			"Enabled": false,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/4a497572d1014beab577112d5a37c813"
+		},
+		{
+			"Name": "CompactLoginSystem",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/a67b610d8d44437a88f35d912318d174"
 		}
 	]
 }
