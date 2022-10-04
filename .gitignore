@@ -82,3 +82,5 @@ Plugins/UNACardboardVR/*
 
 # Photon Cloud Plugin Files
 Plugins/PhotonCloudAPI/*
+
+Plugins/CompactLoginSystem/*
